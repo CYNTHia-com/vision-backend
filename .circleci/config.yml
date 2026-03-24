@@ -21,8 +21,11 @@ jobs:
       - checkout
       - node/install-packages
       - run:
-          name: Run Tests
-          command: npm test
+          name: Run Tests with Coverage
+          command: npm run test:coverage
+      - run:
+          name: Upload Coverage to Coveralls
+          command: cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js || true
 
   build:
     docker:
