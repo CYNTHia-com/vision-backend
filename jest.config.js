@@ -1,6 +1,8 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
-  preset: 'ts-jest',
+  transform: {
+    '^.+\\.(t|j)sx?$': '@swc/jest',
+  },
   testEnvironment: 'node',
   testMatch: ['**/*.test.ts'],
   verbose: true,
@@ -11,6 +13,7 @@ module.exports = {
   collectCoverage: true,
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov'],
+  coveragePathIgnorePatterns: ['/node_modules/', 'src/index.ts'],
   coverageThreshold: {
     global: {
       branches: 80,

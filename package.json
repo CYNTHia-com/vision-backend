@@ -31,6 +31,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@swc/core": "^1.15.21",
+    "@swc/jest": "^0.2.39",
     "@types/express": "^5.0.6",
     "@types/jest": "^29.5.14",
     "@types/node": "^25.5.0",
@@ -45,7 +47,6 @@
     "nodemon": "^3.1.14",
     "prettier": "^3.8.1",
     "supertest": "^7.2.2",
-    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.2"
