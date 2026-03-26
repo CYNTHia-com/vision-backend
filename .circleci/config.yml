@@ -1,0 +1,77 @@
+version: 2.1
+
+orbs:
+  node: circleci/node@5.1.0
+  slack: circleci/slack@4.12.5
+
+executors:
+  node-executor:
+    docker:
+      - image: cimg/node:20.10.0
+
+jobs:
+  lint:
+    executor: node-executor
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+          cache-path: node_modules
+          override-cache-key: v1-deps-{{ checksum "package-lock.json" }}
+      - run:
+          name: Run Linting
+          command: npm run lint
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+
+  test:
+    executor: node-executor
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+          cache-path: node_modules
+          override-cache-key: v1-deps-{{ checksum "package-lock.json" }}
+      - run:
+          name: Run Tests with Coverage
+          command: npm run test:coverage
+      - run:
+          name: Upload Coverage to Coveralls
+          command: cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js || true
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+      - slack/notify:
+          event: pass
+          template: success_tagged_deploy_1
+
+  build:
+    executor: node-executor
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+          cache-path: node_modules
+          override-cache-key: v1-deps-{{ checksum "package-lock.json" }}
+      - run:
+          name: Build Project
+          command: npm run build
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+      - slack/notify:
+          event: pass
+          template: success_tagged_deploy_1
+
+workflows:
+  version: 2
+  validate:
+    jobs:
+      - lint
+      - test:
+          requires:
+            - lint
+      - build:
+          requires:
+            - test
