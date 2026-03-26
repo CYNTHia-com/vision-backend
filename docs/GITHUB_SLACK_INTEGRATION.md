@@ -25,14 +25,11 @@ Inside the `#dev-updates` channel, run the following command:
 Follow the prompts to authorize your GitHub account.
 
 ### 4. Subscribe to Repository Events
-In the same Slack channel, subscribe to your repository:
-```bash
-/github subscribe owner/repo
-```
-*Example:*
+In the `#dev-updates` channel, subscribe to your repository to receive activity updates:
 ```bash
 /github subscribe CYNTHia-com/vision-backend
 ```
+This command automatically enables notifications for Pull Requests, Issues, and Commits.
 
 ### 5. Customize Notifications
 You can enable specific events to avoid noise:
@@ -40,11 +37,18 @@ You can enable specific events to avoid noise:
 /github subscribe owner/repo issues pulls commits deployments
 ```
 
-### 6. Test the Integration
+### 6. Automated CI/CD Notifications
+The project is configured to send automated status reports from CircleCI (e.g., build success/failure) to Slack.
+1. Ensure the **CircleCI Slack App** is installed in your workspace.
+2. The `.circleci/config.yml` file contains the necessary `slack` orb configuration.
+3. Once the environment variables (`SLACK_ACCESS_TOKEN`, `SLACK_DEFAULT_CHANNEL`) are set in CircleCI, you will receive real-time build updates.
+
+### 7. Test the Integration
 1. Create a test PR in GitHub.
 2. Push a commit to the repository.
 3. Open a test issue.
-4. Verify that notifications appear in the `#dev-updates` channel.
+4. Trigger a CircleCI build.
+5. Verify that notifications for all these events appear in the `#dev-updates` channel.
 
 ##  Definition of Done
 - Slack channel receives PR notifications, commit updates, and issue activity.
