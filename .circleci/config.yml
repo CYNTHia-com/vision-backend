@@ -1,5 +1,5 @@
 # ============================================================
-# CircleCI CI Pipeline — vision-backend
+# CircleCI CI Pipeline — vision-backend (Triggered)
 # ============================================================
 # Triggers: every push and every pull request (CircleCI default)
 # Jobs run sequentially: lint → test → build
