@@ -25,7 +25,23 @@ app.get('/docs.json', (req, res) => {
   res.send(swaggerSpec);
 });
 
-// health check
+/**
+ * @openapi
+ * /health:
+ *   get:
+ *     tags:
+ *       - Health
+ *     summary: Health check
+ *     description: Returns a simple OK response to confirm the API server is running and reachable.
+ *     responses:
+ *       200:
+ *         description: Server is healthy and accepting requests
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: OK
+ */
 app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
