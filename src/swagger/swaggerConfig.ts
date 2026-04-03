@@ -29,7 +29,10 @@ const options: swaggerJsdoc.Options = {
     },
   },
   // Path to the API docs — include index.ts so /health is documented
-  apis: [path.join(__dirname, '../routes/*.ts'), path.join(__dirname, '../index.ts')],
+  apis: [
+    path.join(__dirname, '../routes/*.ts'),
+    path.join(__dirname, '../index.ts'),
+  ],
 };
 
 export const swaggerSpec = swaggerJsdoc(options);

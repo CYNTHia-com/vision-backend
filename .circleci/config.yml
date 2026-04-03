@@ -13,7 +13,6 @@ version: 2.1
 # Pre-built command collections that save us writing boilerplate
 orbs:
   node: circleci/node@5.1.0      # npm install + smart caching
-  slack: circleci/slack@4.12.5   # Slack notifications on pass/fail
 
 # ── Executor ─────────────────────────────────────────────────
 # Shared Docker image used by all jobs.
@@ -41,8 +40,7 @@ jobs:
       # Cache is invalidated automatically whenever package-lock.json changes.
       - node/install-packages:
           pkg-manager: npm
-          cache-path: ~/vision-backend/node_modules
-          override-cache-key: v2-deps-{{ checksum "package-lock.json" }}
+          cache-version: v2
 
       # ESLint — catches logic/style issues defined in .eslintrc.json
       - run:
@@ -54,11 +52,6 @@ jobs:
           name: "✨ Check Formatting (Prettier)"
           command: npm run format:check
 
-      # Notify the team on Slack when this job fails
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
-
   # ── 2. TEST ────────────────────────────────────────────────
   # Purpose : Run all unit and integration tests with coverage.
   # Checks  : All Jest tests must pass AND coverage must meet
@@ -67,8 +60,6 @@ jobs:
   #           lcov report → Coveralls for coverage badge/history.
   test:
     executor: node-executor
-    # Safety valve: kill the job if tests hang for more than 5 minutes
-    no_output_timeout: 5m
     environment:
       # Tell Express/dotenv that we are in test mode.
       # index.ts uses this to skip app.listen(), preventing port conflicts.
@@ -81,8 +72,7 @@ jobs:
 
       - node/install-packages:
           pkg-manager: npm
-          cache-path: ~/vision-backend/node_modules
-          override-cache-key: v2-deps-{{ checksum "package-lock.json" }}
+          cache-version: v2
 
       # Create the output directory for JUnit results
       - run:
@@ -112,14 +102,6 @@ jobs:
               echo "No lcov.info found — skipping Coveralls upload"
             fi
 
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
-
-      - slack/notify:
-          event: pass
-          template: success_tagged_deploy_1
-
   # ── 3. BUILD ───────────────────────────────────────────────
   # Purpose : Verify the TypeScript project compiles without errors.
   # Checks  : tsc must exit 0 — catches type errors that tests may miss.
@@ -131,8 +113,7 @@ jobs:
 
       - node/install-packages:
           pkg-manager: npm
-          cache-path: ~/vision-backend/node_modules
-          override-cache-key: v2-deps-{{ checksum "package-lock.json" }}
+          cache-version: v2
 
       # TypeScript compilation — fails hard on any type error
       - run:
@@ -144,14 +125,6 @@ jobs:
       - store_artifacts:
           path: dist
           destination: compiled-dist
-
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
-
-      - slack/notify:
-          event: pass
-          template: success_tagged_deploy_1
 
 # ── Workflow ──────────────────────────────────────────────────
 # Defines the order in which jobs run.

@@ -1,37 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="14" failures="0" errors="0" time="8.314">
-  <testsuite name="mathUtils" errors="0" failures="0" skipped="0" timestamp="2026-04-03T17:52:34" time="1.441" tests="7">
-    <testcase classname="mathUtils add should correctly add two positive numbers" name="mathUtils add should correctly add two positive numbers" time="0.026">
+<testsuites name="jest tests" tests="14" failures="0" errors="0" time="52.586">
+  <testsuite name="mathUtils" errors="0" failures="0" skipped="0" timestamp="2026-04-03T20:02:08" time="7.965" tests="7">
+    <testcase classname="mathUtils add should correctly add two positive numbers" name="mathUtils add should correctly add two positive numbers" time="0.084">
     </testcase>
-    <testcase classname="mathUtils add should correctly add a positive and a negative number" name="mathUtils add should correctly add a positive and a negative number" time="0.001">
+    <testcase classname="mathUtils add should correctly add a positive and a negative number" name="mathUtils add should correctly add a positive and a negative number" time="0.002">
     </testcase>
     <testcase classname="mathUtils subtract should correctly subtract two numbers" name="mathUtils subtract should correctly subtract two numbers" time="0.001">
     </testcase>
-    <testcase classname="mathUtils multiply should correctly multiply two numbers" name="mathUtils multiply should correctly multiply two numbers" time="0.001">
+    <testcase classname="mathUtils multiply should correctly multiply two numbers" name="mathUtils multiply should correctly multiply two numbers" time="0.002">
     </testcase>
-    <testcase classname="mathUtils multiply should correctly multiply by zero" name="mathUtils multiply should correctly multiply by zero" time="0.001">
+    <testcase classname="mathUtils multiply should correctly multiply by zero" name="mathUtils multiply should correctly multiply by zero" time="0.003">
     </testcase>
-    <testcase classname="mathUtils divide should correctly divide two numbers" name="mathUtils divide should correctly divide two numbers" time="0">
+    <testcase classname="mathUtils divide should correctly divide two numbers" name="mathUtils divide should correctly divide two numbers" time="0.001">
     </testcase>
-    <testcase classname="mathUtils divide should throw an error when dividing by zero" name="mathUtils divide should throw an error when dividing by zero" time="0.048">
-    </testcase>
-  </testsuite>
-  <testsuite name="GET /health" errors="0" failures="0" skipped="0" timestamp="2026-04-03T17:52:34" time="7.082" tests="1">
-    <testcase classname="GET /health should return 200 OK" name="GET /health should return 200 OK" time="0.171">
+    <testcase classname="mathUtils divide should throw an error when dividing by zero" name="mathUtils divide should throw an error when dividing by zero" time="0.726">
     </testcase>
   </testsuite>
-  <testsuite name="API Integration Tests" errors="0" failures="0" skipped="0" timestamp="2026-04-03T17:52:34" time="7.331" tests="6">
-    <testcase classname="API Integration Tests GET /health should return 200 OK" name="API Integration Tests GET /health should return 200 OK" time="0.184">
+  <testsuite name="GET /health" errors="0" failures="0" skipped="0" timestamp="2026-04-03T20:02:08" time="41.44" tests="1">
+    <testcase classname="GET /health should return 200 OK" name="GET /health should return 200 OK" time="0.357">
     </testcase>
-    <testcase classname="API Integration Tests Swagger Documentation should serve Swagger UI at /docs" name="API Integration Tests Swagger Documentation should serve Swagger UI at /docs" time="0.029">
+  </testsuite>
+  <testsuite name="API Integration Tests" errors="0" failures="0" skipped="0" timestamp="2026-04-03T20:02:08" time="41.99" tests="6">
+    <testcase classname="API Integration Tests GET /health should return 200 OK" name="API Integration Tests GET /health should return 200 OK" time="0.366">
     </testcase>
-    <testcase classname="API Integration Tests Swagger Documentation should serve raw OpenAPI spec at /docs.json" name="API Integration Tests Swagger Documentation should serve raw OpenAPI spec at /docs.json" time="0.011">
+    <testcase classname="API Integration Tests Swagger Documentation should serve Swagger UI at /docs" name="API Integration Tests Swagger Documentation should serve Swagger UI at /docs" time="0.033">
     </testcase>
-    <testcase classname="API Integration Tests API Routes (Mock) GET /api/v1/products should return mock products" name="API Integration Tests API Routes (Mock) GET /api/v1/products should return mock products" time="0.014">
+    <testcase classname="API Integration Tests Swagger Documentation should serve raw OpenAPI spec at /docs.json" name="API Integration Tests Swagger Documentation should serve raw OpenAPI spec at /docs.json" time="0.022">
     </testcase>
-    <testcase classname="API Integration Tests API Routes (Mock) POST /api/v1/auth/login should return tokens" name="API Integration Tests API Routes (Mock) POST /api/v1/auth/login should return tokens" time="0.045">
+    <testcase classname="API Integration Tests API Routes (Mock) GET /api/v1/products should return mock products" name="API Integration Tests API Routes (Mock) GET /api/v1/products should return mock products" time="0.024">
     </testcase>
-    <testcase classname="API Integration Tests GET /non-existent-route should return 404 Not Found" name="API Integration Tests GET /non-existent-route should return 404 Not Found" time="0.02">
+    <testcase classname="API Integration Tests API Routes (Mock) POST /api/v1/auth/login should return tokens" name="API Integration Tests API Routes (Mock) POST /api/v1/auth/login should return tokens" time="0.474">
+    </testcase>
+    <testcase classname="API Integration Tests GET /non-existent-route should return 404 Not Found" name="API Integration Tests GET /non-existent-route should return 404 Not Found" time="0.019">
     </testcase>
   </testsuite>
 </testsuites>
