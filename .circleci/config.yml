@@ -1,70 +1,93 @@
 # ============================================================
-# CircleCI CI Pipeline — vision-backend (Triggered)
+# CircleCI CI Pipeline — vision-backend
 # ============================================================
-# Triggers: every push and every pull request (CircleCI default)
-# Jobs run sequentially: lint → test → build
-# A failure in any job prevents downstream jobs from running,
-# ensuring broken code never reaches the build stage.
+#
+# PURPOSE:
+#   Automatically validate every push and pull request to ensure
+#   no broken, untested, or unformatted code is ever merged into
+#   the main branch.
+#
+# WORKFLOW (runs sequentially — each stage must pass before next):
+#   lint ──▶ test ──▶ build
+#
+# QUALITY GATES:
+#   ✔ ESLint + Prettier must pass (lint)
+#   ✔ All Jest tests must pass (test)
+#   ✔ Coverage must meet 80% threshold (test)
+#   ✔ TypeScript must compile without errors (build)
+#   ✔ Coverage data is uploaded to Coveralls (test)
+#
+# SECURITY:
+#   ✔ COVERALLS_REPO_TOKEN is set via CircleCI Environment Variables
+#     (Project Settings → Environment Variables) — NEVER commit tokens
+#
+# CACHING:
+#   ✔ node_modules is cached keyed on package-lock.json checksum
+#     meaning cache is auto-invalidated on any dependency change
 # ============================================================
 
 version: 2.1
 
 # ── Orbs ─────────────────────────────────────────────────────
-# Pre-built command collections that save us writing boilerplate
+# Pre-built command collections that save us writing boilerplate.
+# circleci/node@5.1.0 provides smart npm caching + install steps.
 orbs:
-  node: circleci/node@5.1.0      # npm install + smart caching
+  node: circleci/node@5.1.0
 
 # ── Executor ─────────────────────────────────────────────────
-# Shared Docker image used by all jobs.
-# Using the official CircleCI Node 20 LTS convenience image.
+# A single shared Docker environment used by all jobs.
+# cimg/node:20.18 is CircleCI's official Node 20 LTS image.
 executors:
   node-executor:
     docker:
       - image: cimg/node:20.18
-    # Give each job its own working directory
     working_directory: ~/vision-backend
 
 # ── Jobs ─────────────────────────────────────────────────────
 jobs:
 
   # ── 1. LINT ────────────────────────────────────────────────
-  # Purpose : Enforce code quality gates before running tests.
-  # Checks  : ESLint (TypeScript rules) + Prettier formatting.
-  # Fails if: Any ESLint error OR any formatting mismatch.
+  # PURPOSE : Enforce code quality BEFORE running expensive tests.
+  # TOOLS   : ESLint (TypeScript rules) + Prettier (formatting).
+  # FAILS IF: Any ESLint error OR any formatting mismatch.
+  # WHY     : Catches style/logic issues early with zero cost.
+  #           Prevents test job from running on obviously broken code.
   lint:
     executor: node-executor
     steps:
       - checkout
 
-      # Restore cached node_modules to speed up the job.
-      # Cache is invalidated automatically whenever package-lock.json changes.
+      # Restore cached node_modules. Cache key is based on
+      # package-lock.json checksum — auto-invalidated on dep changes.
       - node/install-packages:
           pkg-manager: npm
           cache-version: v2
 
-      # ESLint — catches logic/style issues defined in .eslintrc.json
+      # ESLint — enforces TypeScript rules from .eslintrc.json
+      # Fails immediately if any rule is violated.
       - run:
           name: "🔍 Run ESLint"
           command: npm run lint
 
-      # Prettier — ensures consistent formatting across all .ts files
+      # Prettier — ensures every .ts file is consistently formatted.
+      # format:check exits with code 1 if any file would be modified.
       - run:
           name: "✨ Check Formatting (Prettier)"
           command: npm run format:check
 
   # ── 2. TEST ────────────────────────────────────────────────
-  # Purpose : Run all unit and integration tests with coverage.
-  # Checks  : All Jest tests must pass AND coverage must meet
-  #           the 80% threshold set in jest.config.js.
-  # Reports : JUnit XML → CircleCI "Tests" tab for per-test insight.
-  #           lcov report → Coveralls for coverage badge/history.
+  # PURPOSE : Run all unit + integration tests with coverage reporting.
+  # TOOLS   : Jest + SWC (fast TypeScript transforms) + Coveralls.
+  # FAILS IF: Any test fails OR coverage drops below 80%.
+  # REPORTS :
+  #   • JUnit XML  → CircleCI "Tests" tab (per-test detail + timing)
+  #   • lcov report → Coveralls (external coverage badge + history)
   test:
     executor: node-executor
     environment:
-      # Tell Express/dotenv that we are in test mode.
-      # index.ts uses this to skip app.listen(), preventing port conflicts.
+      # Prevents app.listen() from running during tests (port conflicts)
       NODE_ENV: test
-      # Directory where jest-junit writes the XML test report
+      # Where jest-junit writes its XML output
       JEST_JUNIT_OUTPUT_DIR: ./test-results
       JEST_JUNIT_OUTPUT_NAME: junit.xml
     steps:
@@ -74,38 +97,45 @@ jobs:
           pkg-manager: npm
           cache-version: v2
 
-      # Create the output directory for JUnit results
+      # Ensure the output directory exists before test run
       - run:
           name: "📂 Create test-results directory"
           command: mkdir -p ./test-results
 
-      # Run tests in CI mode (no interactive watch, deterministic output)
-      # jest-junit reporter generates test-results/junit.xml automatically
+      # Run all tests in CI mode:
+      #   --ci           : Disables interactive watch, deterministic output
+      #   --coverage     : Collects coverage and enforces thresholds
+      #   --reporters    : Outputs both default console + JUnit XML
+      # Pipeline FAILS if any test fails or any threshold is not met.
       - run:
           name: "🧪 Run Tests with Coverage"
           command: npm run test:ci
 
-      # Parse the JUnit XML → fills the "Tests" tab in CircleCI UI
-      # Developers can see exactly which tests failed and their duration
+      # Parse JUnit XML → fills the CircleCI "Tests" tab.
+      # Developers can click through to see exactly which test failed
+      # and how long each test suite took to run.
       - store_test_results:
           path: ./test-results
 
-      # Upload coverage report to Coveralls.
-      # COVERALLS_REPO_TOKEN must be set in CircleCI project environment variables
-      # (Project Settings → Environment Variables) — never commit it to git!
+      # Upload the lcov.info coverage report to Coveralls.
+      # COVERALLS_REPO_TOKEN must be set in CircleCI project settings.
+      # The `|| true` ensures a Coveralls outage never breaks the build.
       - run:
           name: "📊 Upload Coverage to Coveralls"
           command: |
             if [ -f ./coverage/lcov.info ]; then
+              echo "✅ lcov.info found — uploading to Coveralls..."
               cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js || true
             else
-              echo "No lcov.info found — skipping Coveralls upload"
+              echo "⚠️  No lcov.info found — skipping Coveralls upload"
             fi
 
   # ── 3. BUILD ───────────────────────────────────────────────
-  # Purpose : Verify the TypeScript project compiles without errors.
-  # Checks  : tsc must exit 0 — catches type errors that tests may miss.
-  # Artifact: Stores the compiled dist/ so it can be downloaded/deployed.
+  # PURPOSE : Verify the TypeScript project compiles without errors.
+  # TOOLS   : tsc (TypeScript compiler).
+  # FAILS IF: Any TypeScript type error exists.
+  # WHY     : Tests pass at runtime but tsc catches static type errors
+  #           that might crash the app in production.
   build:
     executor: node-executor
     steps:
@@ -115,26 +145,34 @@ jobs:
           pkg-manager: npm
           cache-version: v2
 
-      # TypeScript compilation — fails hard on any type error
+      # TypeScript compilation — exits 1 on any type error
       - run:
           name: "🔨 Build TypeScript (tsc)"
           command: npm run build
 
-      # Store compiled output as a downloadable CircleCI artifact.
-      # Useful for debugging build output or manual deployment.
+      # Store compiled dist/ as a downloadable CircleCI artifact.
+      # Useful for debugging build output or manual deploy verification.
       - store_artifacts:
           path: dist
           destination: compiled-dist
 
 # ── Workflow ──────────────────────────────────────────────────
-# Defines the order in which jobs run.
-# CircleCI triggers this workflow on EVERY push and EVERY pull request.
-# `requires` enforces the chain: lint must pass before test runs,
-# and test must pass before build runs.
-# If any job fails, all downstream jobs are automatically skipped.
+# Controls the order and dependencies between jobs.
+#
+# Execution order: lint → test → build
+#
+# `requires` enforces the quality gate chain:
+#   • test  only runs if lint   passed
+#   • build only runs if test   passed
+#
+# If lint fails  → test  is skipped → build is skipped
+# If test fails  → build is skipped
+# If build fails → pipeline is red  → PR cannot be merged
+#
+# CircleCI triggers this workflow on EVERY push and EVERY pull request
+# by default — no extra configuration required.
 workflows:
   version: 2
-  # Name reflects the purpose: validate before any merge
   ci-validate:
     jobs:
       - lint
@@ -145,4 +183,4 @@ workflows:
 
       - build:
           requires:
-            - test   # Don't attempt a build if any test is failing
+            - test   # Don't attempt build if any test is failing
