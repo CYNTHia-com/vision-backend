@@ -42,7 +42,6 @@ describe('API Integration Tests', () => {
       expect(response.body).toHaveProperty('accessToken');
     });
   });
-
   describe('GET /non-existent-route', () => {
     it('should return 404 Not Found', async () => {
       const response = await request(app).get('/non-existent-route');
